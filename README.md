@@ -17,3 +17,8 @@
     5.allow for spotipy to include recommendations as well
     6.create detailed documentation around code
     7.include more code with increased functionality
+
+
+Known Errors:
+   1.Songs can no longer be recommendended unless they are spelled correctly (including caps)
+      previously, it would recommend the same song inputed but could recommend song even if not capitalized correctly
