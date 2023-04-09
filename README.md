@@ -20,5 +20,8 @@
 
 
 Known Errors:
-   1.Songs can no longer be recommendended unless they are spelled correctly (including caps)
+   1.(possibly fixed)Songs can no longer be recommendended unless they are spelled correctly (including caps)
       previously, it would recommend the same song inputed but could recommend song even if not capitalized correctly
+   2.When searching spotify for a song/artist/year, it will usually grab the something with the correct information (even if all other info is wrong)
+      ex. if you enter an artist, but enter a completely random song name (which the artist does not have), it will grab a random song of their's
+                     (possible fix) read the spotify information and verify that 'name' and 'artists' is correct

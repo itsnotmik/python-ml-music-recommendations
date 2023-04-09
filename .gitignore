@@ -1,6 +1,3 @@
 *.txt
 .cache
-data1.csv
-data1new.csv
-data2.csv
-data3.csv
+*_ignore.*
