@@ -2,16 +2,18 @@ import os
 import sys
 import subprocess
 
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'numpy'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pandas'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'spotipy'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pickle-mixin'])
+#subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'numpy'])
+#subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pandas'])
+#subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'spotipy'])
+#subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pickle-mixin'])
+#subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pyodbc'])
 
 import numpy as np
 import pandas as pd
 import spotipy
 import pickle
 import warnings
+import pyodbc
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -22,7 +24,18 @@ from spotipy.oauth2 import SpotifyClientCredentials
 
 warnings.filterwarnings("ignore")
 
-data = pd.read_csv('E:\GitHub\music-recommendation-system\data\data_features.csv')
+with open('E:/GitHub/music-recommendation-system/data/db_connection.txt', 'r') as tf:
+    db_conn = tf.read()
+
+db_connection = pyodbc.connect(db_conn)
+
+data = pd.read_sql('SELECT * FROM Songs', db_connection)
+
+#print(data)
+
+#data = pd.read_csv('E:\GitHub\music-recommendation-system\data\data_features.csv')
+
+#print(data)
 
 with open('E:\GitHub\music-recommendation-system\data\spotipyclientid.txt', 'r') as tf:
     SPOTIPY_CLIENT_ID = tf.read()
@@ -36,26 +49,19 @@ song_cluster_pipeline = Pipeline([('scaler', StandardScaler()),
                                    verbose=False))
                                  ], verbose=False)
 
-number_cols = ['track_number', 'disc_number', 'danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 
+number_cols = ['danceability', 'energy', 'key', 'loudness', 'speechiness', 
                'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature', 'year']
 
 def main():
-    argutest = ' '.join(sys.argv[1:])
-    print(argutest)
     argu = np.array(list(eval(' '.join(sys.argv[1:]))))
-    print(argu)
-
-    print(argu[1]['name'])
-
-    print(recommend_songs(argu, data))
-    return 0
+    return print(recommend_songs(argu, data))
 
 def new_song(song):
     #sendsongtodatabase!
     return 0
 
 def fit_pipeline(pipeline):
-    if (os.path.getsize('E:\GitHub\music-recommendation-system\data\data.sav') != 0):
+    if (os.path.getsize('E:\GitHub\music-recommendation-system\data\data.sav') == 0):
         X = data.select_dtypes(np.number)
         number_cols = list(X.columns)
         pipeline.fit(X)
