@@ -1,12 +1,17 @@
 import os
 import sys
+import subprocess
+
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'numpy'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pandas'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'spotipy'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pickle-mixin'])
+
 import numpy as np
 import pandas as pd
 import spotipy
-import pyodbc
 import pickle
 import warnings
-import json
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -14,7 +19,6 @@ from sklearn.pipeline import Pipeline
 from scipy.spatial.distance import cdist
 from collections import defaultdict
 from spotipy.oauth2 import SpotifyClientCredentials
-from azure.identity import AzureCliCredential
 
 warnings.filterwarnings("ignore")
 
@@ -32,12 +36,16 @@ song_cluster_pipeline = Pipeline([('scaler', StandardScaler()),
                                    verbose=False))
                                  ], verbose=False)
 
-number_coll = ['track_number', 'disc_number', 'danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 
+number_cols = ['track_number', 'disc_number', 'danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 
                'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature', 'year']
 
 def main():
-    argu = list(eval(' '.join(sys.argv[1:])))
+    argutest = ' '.join(sys.argv[1:])
+    print(argutest)
+    argu = np.array(list(eval(' '.join(sys.argv[1:]))))
     print(argu)
+
+    print(argu[1]['name'])
 
     print(recommend_songs(argu, data))
     return 0
@@ -47,7 +55,7 @@ def new_song(song):
     return 0
 
 def fit_pipeline(pipeline):
-    if (os.path.getsize('E:\GitHub\music-recommendation-system\data\data.sav') == 0):
+    if (os.path.getsize('E:\GitHub\music-recommendation-system\data\data.sav') != 0):
         X = data.select_dtypes(np.number)
         number_cols = list(X.columns)
         pipeline.fit(X)
@@ -115,7 +123,7 @@ def get_mean_vector(song_list, spotify_data):
         if song_data is None:
             print('Warning: "{}" does not exist in Spotify or in database'.format(song['name']))
             return None
-        song_vector = song_data[number_coll].values
+        song_vector = song_data[number_cols].values
         song_vectors.append(song_vector)  
     
     song_matrix = np.array(list(song_vectors))
@@ -146,7 +154,7 @@ def recommend_songs(song_list, spotify_data, n_songs=10):
     if (song_center is None):
         return "Song Could Not Be Located in Spotify or Tunit Database"
     scaler = sc_pipeline.steps[0][1]
-    scaled_data = scaler.transform(spotify_data[number_coll])
+    scaled_data = scaler.transform(spotify_data[number_cols])
     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
     distances = cdist(scaled_song_center, scaled_data, 'cosine')
     index = list(np.argsort(distances)[:, :n_songs][0])
