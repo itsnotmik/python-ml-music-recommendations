@@ -193,6 +193,7 @@ app = Flask(__name__)
 @app.route('/home/', methods=['GET'])
 #@cross_origin()
 def get_home():
+    print("GOT HOME REQUEST\n\n")
     return jsonify('Welcome to Tunit API')
 
 
@@ -227,4 +228,5 @@ def get_recommended(song_id):
 
 
 if __name__ == '__main__':
+    print("RUNNING!\n\n")
     app.run()
