@@ -13,24 +13,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      SPOTIPY_CID: '${{ secrets.SPOTIPY_CLIENT_ID }}'
-      SPOTIPY_CS: '${{ secrets.SPOTIPY_CLIENT_SECRET }}'
 
     steps:
-      - name: Set env variables
-        run: |
-          SPOTIPY_CLIENT_ID=SPOTIPY_CID 
-          SPOTIPY_CLIENT_SECRET=SPOTIPY_CS
-          python -c 'import os;print(os.environ['SPOTIPY_CLIENT_ID'])'
-          python -c 'import os;print(os.environ['SPOTIPY_CLIENT_SECRET'])'
-
       - uses: actions/checkout@v2
 
       - name: Set up Python version
         uses: actions/setup-python@v1
         with:
           python-version: '3.11'
+
+      - name: Set env variables
+          run: python -c 'import os;print(os.environ)'
+          env:
+            SPOTIPY_CID: '${{ secrets.SPOTIPY_CLIENT_ID }}'
+            SPOTIPY_CS: '${{ secrets.SPOTIPY_CLIENT_SECRET }}'
 
       - name: Create and start virtual environment
         run: |
