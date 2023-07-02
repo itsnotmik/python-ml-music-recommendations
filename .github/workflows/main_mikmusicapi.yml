@@ -22,12 +22,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Set env variables
-          run: python -c 'import os;print(os.environ)'
-          env:
-            SPOTIPY_CID: '${{ secrets.SPOTIPY_CLIENT_ID }}'
-            SPOTIPY_CS: '${{ secrets.SPOTIPY_CLIENT_SECRET }}'
-
       - name: Create and start virtual environment
         run: |
           python -m venv venv
@@ -37,6 +31,12 @@ jobs:
         run: pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+
+      - name: Set env variables
+        run: python -c 'import os;print(os.environ)'
+        env:
+          SPOTIPY_CID: '${{ secrets.SPOTIPY_CLIENT_ID }}'
+          SPOTIPY_CS: '${{ secrets.SPOTIPY_CLIENT_SECRET }}'
 
       - name: run rec system
         run: python app.py
