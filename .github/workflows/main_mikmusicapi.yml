@@ -20,8 +20,10 @@ jobs:
     steps:
       - name: Set env variables
         run: |
-          echo "SPOTIPY_CLIENT_ID=SPOTIPY_CID" >> "$GITHUB_ENV"
-          echo "SPOTIPY_CLIENT_SECRET=SPOTIPY_CS" >> "$GITHUB_ENV"
+          SPOTIPY_CLIENT_ID=SPOTIPY_CID 
+          SPOTIPY_CLIENT_SECRET=SPOTIPY_CS
+          python -c 'import os;print(os.environ['SPOTIPY_CLIENT_ID'])'
+          python -c 'import os;print(os.environ['SPOTIPY_CLIENT_SECRET'])'
 
       - uses: actions/checkout@v2
 
