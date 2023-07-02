@@ -33,10 +33,12 @@ jobs:
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Set env variables
-        run: python -c 'import os;print(os.environ)'
         env:
           SPOTIPY_CID: ${{ secrets.SPOTIPY_CLIENT_ID }}
           SPOTIPY_CS: ${{ secrets.SPOTIPY_CLIENT_SECRET }}
+        run: |
+          echo SPOTIPY_CLIENT_ID = '${ SPOTIPY_CID }'
+          echo SPOTIPY_CLIENT_SECRET = '${ SPOTIPY_CS }'
 
       - name: run rec system
         run: python app.py
