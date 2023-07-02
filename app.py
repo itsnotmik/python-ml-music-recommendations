@@ -31,13 +31,13 @@ data = pd.concat([pd.read_csv(f) for f in csv], ignore_index=True)
 
 # data = pd.read_sql('SELECT * FROM Songs', db_connection)
 
-with open('data/spotipyclientid.txt', 'r') as tf:
-    SPOTIPY_CLIENT_ID = tf.read()
-with open('data/spotipyclientsecret.txt', 'r') as tf:
-    SPOTIPY_CLIENT_SECRET = tf.read()
+#with open('data/spotipyclientid.txt', 'r') as tf:
+#    SPOTIPY_CLIENT_ID = tf.read()
+#with open('data/spotipyclientsecret.txt', 'r') as tf:
+#    SPOTIPY_CLIENT_SECRET = tf.read()
 
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET))
+#sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+#    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET))
 
 song_cluster_pipeline = Pipeline([('scaler', StandardScaler()),
                                   ('kmeans', KMeans(n_clusters=10,
