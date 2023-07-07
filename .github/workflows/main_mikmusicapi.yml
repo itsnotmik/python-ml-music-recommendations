@@ -10,6 +10,10 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  SPOTIPY_CID: ${{ secrets.SPOTIPY_CLIENT_ID }}
+  SPOTIPY_CS: ${{ secrets.SPOTIPY_CLIENT_SECRET }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
