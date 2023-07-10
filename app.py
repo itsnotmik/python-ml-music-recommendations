@@ -190,18 +190,21 @@ def extra_data(song_data):
 
 
 app = Flask(__name__)
-#CORS(app)
+CORS(app)
 
+@app.route('/')
+def index():
+    return 0
 
 @app.route('/home/', methods=['GET'])
-#@cross_origin()
+@cross_origin()
 def get_home():
     print("GOT HOME REQUEST\n\n")
     return jsonify('Welcome to Tunit API')
 
 
 @app.route('/api/song/', methods=['GET'])
-#@cross_origin()
+@cross_origin()
 def get_song():
     test = [{'name': 'How to Save A Life', 'artists': 'The Fray', 'year': 2005}, {'name': 'If I Die Young', 'artists': 'The Band Perry',
                                                                                   'year': 2010}, {'name': 'Somebody That I Used To Know', 'artists': 'Gotye', 'year': 2011}]
@@ -209,7 +212,7 @@ def get_song():
 
 
 @app.route('/api/song/<string:song_id>', methods=['GET'])
-#@cross_origin()
+@cross_origin()
 def get_recommended(song_id):
 
     df = (data[data['id'] == song_id])
