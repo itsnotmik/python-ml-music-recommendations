@@ -192,14 +192,10 @@ def extra_data(song_data):
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def index():
-    return 0
-
 @app.route('/home/', methods=['GET'])
 @cross_origin()
 def get_home():
-    print("GOT HOME REQUEST\n\n")
+    print("GOT HOME REQUEST")
     return jsonify('Welcome to Tunit API')
 
 
@@ -234,5 +230,4 @@ def get_recommended(song_id):
 
 
 if __name__ == '__main__':
-    #print("RUNNING!\n\n")
     app.run(host='0.0.0.0')
