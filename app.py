@@ -15,6 +15,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 
+#to do; set up db; modify algo for better optimization; remove redundencies from website to web api
 
 warnings.filterwarnings("ignore")
 
@@ -65,7 +66,10 @@ def fit_pipeline(pipeline):
         data['cluster_label'] = song_cluster_labels
 
         pickle.dump(pipeline, open('data/data.sav', 'wb'))
+
+        print('Pipeline Created!\n')
     else:
+        print('Pipeline Loaded!\n')
         pipeline = pickle.load(open('data/data.sav', 'rb'))
 
     return pipeline
@@ -74,29 +78,37 @@ def fit_pipeline(pipeline):
 def find_song(name, artists, year):
     song_data = defaultdict()
     results = sp.search(q='track: {} artists: {} year: {}'.format(
-        name, artists, year), limit=1, type='track')
+        name, artists, year), limit=50, type='track')
     if results['tracks']['items'] == []:
+        print('Results are Empty!\n')
+        return None
+    
+    correctsong = None
+    
+    for song in results['tracks']['items']:
+        if (song['name'].casefold() != name.casefold()) or (song['artists'][0]['name'].casefold() != artists.casefold()):
+            continue
+        else:
+            correctsong = song
+            break
+
+    if (correctsong == None):
         return None
 
-    results = results['tracks']['items'][0]
+    out_name = correctsong['name']
+    out_artist = correctsong['artists'][0]['name']
+    out_year = correctsong['album']['release_date'][0:4]
 
-    out_name = results['name']
-    out_artist = results['artists'][0]['name']
-    out_year = results['album']['release_date'][0:4]
-
-    if (out_name.casefold() != name.casefold()) or (out_artist.casefold() != artists.casefold()):
-        return None
-
-    track_id = results['id']
+    track_id = correctsong['id']
     audio_features = sp.audio_features(track_id)[0]
 
     song_data['name'] = [out_name]
     song_data['year'] = [int(out_year)]
-    song_data['explicit'] = [int(results['explicit'])]
-    song_data['duration_ms'] = [results['duration_ms']]
-    song_data['popularity'] = [results['popularity']]
-    song_data['track_number'] = [results['track_number']]
-    song_data['disc_number'] = [results['disc_number']]
+    song_data['explicit'] = [int(correctsong['explicit'])]
+    song_data['duration_ms'] = [correctsong['duration_ms']]
+    song_data['popularity'] = [correctsong['popularity']]
+    song_data['track_number'] = [correctsong['track_number']]
+    song_data['disc_number'] = [correctsong['disc_number']]
 
     for key, value in audio_features.items():
         song_data[key] = value
@@ -150,7 +162,7 @@ def flatten_dict_list(dict_list):
     return flattened_dict
 
 
-def recommend_songs(song_list, spotify_data, n_songs=10):
+def recommend_songs(song_list, spotify_data, n_songs=15):
 
     sc_pipeline = fit_pipeline(song_cluster_pipeline)
 
@@ -190,25 +202,25 @@ def extra_data(song_data):
 
 
 app = Flask(__name__)
-CORS(app)
+#CORS(app)
 
-@app.route('/home/', methods=['GET'])
-@cross_origin()
+@app.route('/', methods=['GET'])
+#@cross_origin()
 def get_home():
-    print("GOT HOME REQUEST")
-    return jsonify('Welcome to Tunit API')
+    return jsonify('Hello!')
 
 
 @app.route('/api/song/', methods=['GET'])
-@cross_origin()
+#@cross_origin()
 def get_song():
-    test = [{'name': 'How to Save A Life', 'artists': 'The Fray', 'year': 2005}, {'name': 'If I Die Young', 'artists': 'The Band Perry',
-                                                                                  'year': 2010}, {'name': 'Somebody That I Used To Know', 'artists': 'Gotye', 'year': 2011}]
+    test = [{'name': 'How to Save A Life', 'artists': 'The Fray', 'year': 2005}, 
+            {'name': 'If I Die Young', 'artists': 'The Band Perry', 'year': 2010}, 
+            {'name': 'Somebody That I Used To Know', 'artists': 'Gotye', 'year': 2011}]
     return jsonify(recommend_songs(test, data))
 
 
 @app.route('/api/song/<string:song_id>', methods=['GET'])
-@cross_origin()
+#@cross_origin()
 def get_recommended(song_id):
 
     df = (data[data['id'] == song_id])
