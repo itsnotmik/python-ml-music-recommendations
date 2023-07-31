@@ -19,18 +19,19 @@ from flask_cors import CORS, cross_origin
 
 warnings.filterwarnings("ignore")
 
-csv = ['data/tracks0.csv', 'data/tracks1.csv',
-       'data/tracks2.csv', 'data/tracks3.csv', 'data/tracks4.csv']
-data = pd.concat([pd.read_csv(f) for f in csv], ignore_index=True)
+#csv = ['data/tracks0.csv', 'data/tracks1.csv',
+#       'data/tracks2.csv', 'data/tracks3.csv', 'data/tracks4.csv']
+#data = pd.concat([pd.read_csv(f) for f in csv], ignore_index=True)
 
 # data = pd.read_csv('data/data_features.csv')
 
-# with open('data/db_connection.txt', 'r') as tf:
-#    db_conn = tf.read()
+#with open('data/db_connection.txt', 'r') as tf:
+#   db_conn = tf.read()
+db_connection = os.environ.get('db_connection')
 
-# db_connection = pyodbc.connect(db_conn)
+db_conn = pyodbc.connect(db_connection)
 
-# data = pd.read_sql('SELECT * FROM Songs', db_connection)
+data = pd.read_sql('SELECT * FROM music_data', db_conn)
 
 #with open('data/spotipyclientid.txt', 'r') as tf:
 #    SPOTIPY_CLIENT_ID = tf.read()
