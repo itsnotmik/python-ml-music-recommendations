@@ -27,9 +27,21 @@ warnings.filterwarnings("ignore")
 
 #with open('data/db_connection.txt', 'r') as tf:
  #  DB_CONN = tf.read()
-DB_CONN = os.environ.get('DB_CONN')
+#DB_CONN = os.environ.get('DB_CONN')
+DB_SERVER = os.environ.get('DB_SERVER')
+DB_USER = os.environ.get('DB_USER')
+DB_PASS = os.environ.get('DB_PASS')
+DB_TABLE = os.environ.get('DB_TABLE')
 
-db_conn = pyodbc.connect(DB_CONN)
+db_conn = pyodbc.connect("Driver={ODBC Driver 18 for SQL Server};"
+                         "Server=" + DB_SERVER +
+                         ";Database=" + DB_TABLE +
+                         ";Uid=" + DB_USER +
+                         ";Pwd=" + DB_PASS +
+                         ";Encrypt=yes;"
+                         "TrustServerCertificate=no;"
+                         "Connection Timeout=30;"
+                         "Authentication=ActiveDirectoryPassword")
 
 data = pd.read_sql('SELECT * FROM music_data', db_conn)
 
