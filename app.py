@@ -26,10 +26,12 @@ warnings.filterwarnings("ignore")
 # data = pd.read_csv('data/data_features.csv')
 
 #with open('data/db_connection.txt', 'r') as tf:
-#   db_conn = tf.read()
-db_connection = os.environ.get('db_connection')
+#   DB_CONNECTION = tf.read()
+DB_CONN = os.environ.get('db_connection')
 
-db_conn = pyodbc.connect(db_connection)
+print(DB_CONN)
+
+db_conn = pyodbc.connect(DB_CONN)
 
 data = pd.read_sql('SELECT * FROM music_data', db_conn)
 
