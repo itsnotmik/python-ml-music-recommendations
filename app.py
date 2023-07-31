@@ -26,10 +26,8 @@ warnings.filterwarnings("ignore")
 # data = pd.read_csv('data/data_features.csv')
 
 #with open('data/db_connection.txt', 'r') as tf:
-#   DB_CONNECTION = tf.read()
-DB_CONN = os.environ.get('db_connection')
-
-print(DB_CONN)
+ #  DB_CONN = tf.read()
+DB_CONN = os.environ.get('DB_CONN')
 
 db_conn = pyodbc.connect(DB_CONN)
 
@@ -44,7 +42,8 @@ SPOTIPY_CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET))
+    client_id=SPOTIPY_CLIENT_ID, 
+    client_secret=SPOTIPY_CLIENT_SECRET))
 
 song_cluster_pipeline = Pipeline([('scaler', StandardScaler()),
                                   ('kmeans', KMeans(n_clusters=10,
