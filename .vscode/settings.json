@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/219c19b5-2e68-430e-be41-d144b6e3d03e/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/mikmusicapi",
-    "appService.deploySubpath": "."
-}
