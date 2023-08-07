@@ -15,19 +15,9 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 
-#to do; set up db; modify algo for better optimization; remove redundencies from website to web api
 
 warnings.filterwarnings("ignore")
 
-#csv = ['data/tracks0.csv', 'data/tracks1.csv',
-#       'data/tracks2.csv', 'data/tracks3.csv', 'data/tracks4.csv']
-#data = pd.concat([pd.read_csv(f) for f in csv], ignore_index=True)
-
-# data = pd.read_csv('data/data_features.csv')
-
-#with open('data/db_connection.txt', 'r') as tf:
- #  DB_CONN = tf.read()
-#DB_CONN = os.environ.get('DB_CONN')
 DB_SERVER = os.environ.get('DB_SERVER')
 DB_USER = os.environ.get('DB_USER')
 DB_PASS = os.environ.get('DB_PASS')
@@ -43,12 +33,9 @@ db_conn = pyodbc.connect("Driver={ODBC Driver 18 for SQL Server};"
                          "Connection Timeout=30;"
                          "Authentication=ActiveDirectoryPassword")
 
-data = pd.read_sql('SELECT * FROM music_data', db_conn)
+sql = 'SELECT * FROM Songs as S INNER JOIN SongData as SD ON (S.id = SD.id)'
 
-#with open('data/spotipyclientid.txt', 'r') as tf:
-#    SPOTIPY_CLIENT_ID = tf.read()
-#with open('data/spotipyclientsecret.txt', 'r') as tf:
-#    SPOTIPY_CLIENT_SECRET = tf.read()
+data = pd.read_sql(sql, db_conn)
 
 SPOTIPY_CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
@@ -62,7 +49,7 @@ song_cluster_pipeline = Pipeline([('scaler', StandardScaler()),
                                    verbose=False))
                                   ], verbose=False)
 
-number_col = ['danceability', 'energy', 'key', 'loudness', 'speechiness',
+number_col = ['danceability', 'energy', 'key', 'loudness', 'speechiness', 
               'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
 
 
@@ -72,6 +59,8 @@ def new_song(song):
 
 
 def fit_pipeline(pipeline):
+    print('Entering Fit Pipeline')
+
     if (os.path.getsize('data/data.sav') == 0):
         X = data[number_col]
         number_cols = list(X.columns)
@@ -81,20 +70,23 @@ def fit_pipeline(pipeline):
 
         pickle.dump(pipeline, open('data/data.sav', 'wb'))
 
-        print('Pipeline Created!\n')
+        print('Pipeline Created!')
     else:
-        print('Pipeline Loaded!\n')
         pipeline = pickle.load(open('data/data.sav', 'rb'))
+        print('Pipeline Loaded!')
 
+    print('Exiting Fit Pipeline\n')
     return pipeline
 
 
 def find_song(name, artists, year):
+    print('Entering Find Song')
     song_data = defaultdict()
     results = sp.search(q='track: {} artists: {} year: {}'.format(
         name, artists, year), limit=50, type='track')
     if results['tracks']['items'] == []:
-        print('Results are Empty!\n')
+        print('Results are Empty!')
+        print('Exiting Find Song\n')
         return None
     
     correctsong = None
@@ -107,6 +99,8 @@ def find_song(name, artists, year):
             break
 
     if (correctsong == None):
+        print('No Correct Song')
+        print('Exiting Find Song\n')
         return None
 
     out_name = correctsong['name']
@@ -127,26 +121,37 @@ def find_song(name, artists, year):
     for key, value in audio_features.items():
         song_data[key] = value
 
+    print('Created Data Frame for Found Song')
+    print('Exiting Find Song\n')
     return pd.DataFrame(song_data)
 
 
 def get_song_data(song, spotify_data):
+    print('Entering Get Song Data')
 
     try:
         song_data = spotify_data[(spotify_data['name'] == song['name']) & (
             spotify_data['artists'] == song['artists']) & (spotify_data['year'] == song['year'])].iloc[0]
+        print('Got Song Data from Database')
+        print('Exiting Get Song Data\n')
         return song_data
 
     except IndexError:
         foundsong = find_song(song['name'], song['artists'], song['year'])
         if (foundsong) is None:
+            print('Song was not Found on Spotify')
+            print('Exiting Get Song Data\n')
             return None
         else:
             new_song(foundsong)
+
+        print('Found Song on Spotify')
+        print('Exiting Get Song Data\n')
         return foundsong
 
 
 def get_mean_vector(song_list, spotify_data):
+    print('Entering Get Mean Vector')
 
     song_vectors = []
 
@@ -155,15 +160,19 @@ def get_mean_vector(song_list, spotify_data):
         if song_data is None:
             print('Warning: "{}" does not exist in Spotify or in database'.format(
                 song['name']))
+            print('Exiting Get Mean Vector\n')
             return None
+        
         song_vector = song_data[number_col].values
         song_vectors.append(song_vector)
 
     song_matrix = np.array(list(song_vectors))
+    print('Exiting Get Mean Vector\n')
     return np.mean(song_matrix, axis=0)
 
 
 def flatten_dict_list(dict_list):
+    print('Entering Flatten Dict List')
 
     flattened_dict = defaultdict()
     for key in dict_list[0].keys():
@@ -173,10 +182,12 @@ def flatten_dict_list(dict_list):
         for key, value in dictionary.items():
             flattened_dict[key].append(value)
 
+    print('Exiting Flatten Dict List\n')
     return flattened_dict
 
 
 def recommend_songs(song_list, spotify_data, n_songs=15):
+    print('Entering Recommend Songs')
 
     sc_pipeline = fit_pipeline(song_cluster_pipeline)
 
@@ -185,7 +196,9 @@ def recommend_songs(song_list, spotify_data, n_songs=15):
 
     song_center = get_mean_vector(song_list, spotify_data)
     if (song_center is None):
-        return "Song Could Not Be Located in Spotify or Tunit Database"
+        print('No Song Located in Spotify or Database')
+        print('Exiting Recommend Songs\n')
+        return "Song Could Not Be Located in Spotify or Database"
     scaler = sc_pipeline.steps[0][1]
     scaled_data = scaler.transform(spotify_data[number_col])
     scaled_song_center = scaler.transform(song_center.reshape(1, -1))
@@ -195,10 +208,13 @@ def recommend_songs(song_list, spotify_data, n_songs=15):
     rec_songs = spotify_data.iloc[index]
     rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
     rec_songs = extra_data(rec_songs)
+    print('Exiting Recommend Songs\n')
     return rec_songs[metadata_cols].to_dict(orient='records')
 
 
 def extra_data(song_data):
+    print('Entering Extra Data')
+
     ids = song_data['id'].reset_index().to_dict()
     art = []
     for id in ids['id'].values():
@@ -206,6 +222,7 @@ def extra_data(song_data):
         art.append(song['album']['images'][0]['url'])
     
     song_data['album art'] = art
+    print('Exiting Extra Data\n')
     return song_data
 
 # Rest of code is to host application as server
@@ -227,16 +244,16 @@ def get_home():
 @app.route('/api/song/', methods=['GET'])
 #@cross_origin()
 def get_song():
+    test2 = [{'name': 'Testify', 'artists': "Rage Against The Machine", 'year': 1999}]
     test = [{'name': 'How to Save A Life', 'artists': 'The Fray', 'year': 2005}, 
             {'name': 'If I Die Young', 'artists': 'The Band Perry', 'year': 2010}, 
             {'name': 'Somebody That I Used To Know', 'artists': 'Gotye', 'year': 2011}]
-    return jsonify(recommend_songs(test, data))
+    return jsonify(recommend_songs(test2, data))
 
 
 @app.route('/api/song/<string:song_id>', methods=['GET'])
 #@cross_origin()
 def get_recommended(song_id):
-
     df = (data[data['id'] == song_id])
     if (df.empty):
         return ("DataFrame is empty (song ID not found)")
