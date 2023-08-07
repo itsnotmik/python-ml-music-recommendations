@@ -36,6 +36,7 @@ db_conn = pyodbc.connect("Driver={ODBC Driver 18 for SQL Server};"
 sql = 'SELECT * FROM Songs as S INNER JOIN SongData as SD ON (S.id = SD.id)'
 
 data = pd.read_sql(sql, db_conn)
+data = data.loc[:, ~data.columns.duplicated()]
 
 SPOTIPY_CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
