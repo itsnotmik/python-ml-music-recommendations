@@ -38,11 +38,11 @@ SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
 #create connection URL
 
 conn_url = URL.create("mssql+pyodbc",
-                      username=DB_USER,
-                      password=DB_PASS,
-                      host=DB_SERVER,
-                      port=DB_PORT,
-                      database=DB_TABLE,
+                      username='***REMOVED***.edu',
+                      password='***REMOVED***',
+                      host='***REMOVED***',
+                      port='1433',
+                      database='***REMOVED***',
                       query={
                           'driver': 'ODBC DRIVER 18 for SQL Server',
                           'TrustServerCertifcate': 'yes',
@@ -68,8 +68,8 @@ data = data.loc[:, ~data.columns.duplicated()]
 #establish connection to spotipy API
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-    client_id=SPOTIPY_CLIENT_ID, 
-    client_secret=SPOTIPY_CLIENT_SECRET))
+    client_id='***REMOVED***', 
+    client_secret='***REMOVED***'))
 
 #create pipeline for KMeans
 
@@ -444,9 +444,17 @@ def get_recommended_search():
         name = song['name'].values
         artist = list(song['artists'])[0]
         year = song['year'].values
-        song_input = [{'name': ', '.join(name), 'artists': ', '.join(artist[:-len(artist)+1]), 
-                    'year': int(', '.join(map(str, year))), 'id': None}]
+
+        if (artist[:-len(artist)+1] == []):
+            artist = artist
+        else:
+            artist = artist[:-len(artist)+1]
         
+        song_input = [{'name': ', '.join(name), 'artists': ', '.join(artist), 
+                    'year': int(', '.join(map(str, year))), 'id': None}]
+    
+    print(song_input)
+
     result = recommend_songs(song_input)
 
     if result == 404:
