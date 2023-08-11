@@ -152,7 +152,7 @@ def fit_pipeline(pipeline):
 
     #if pipeline data is 0 or if the weekday is wednesday - recreate data.sav
     #as we add data into our database we need to recreate data.sav to allow for the music to be recommended
-    if ((os.path.getsize('data/data.sav') == 0 or datetime.today().weekday() == 4) and (not saveupdate)):
+    if ((os.path.getsize('data/data.sav') == 0 or datetime.today().weekday() == 2) and (not saveupdate)):
         #take the values of data w/o axes
         #fit pipeline with the data
         #assign labels to our data
