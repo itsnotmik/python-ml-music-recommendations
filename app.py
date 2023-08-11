@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore")
 #varibles to tweak the program
 numclusters = 10                    #how many clusters in KMeans
 numsongs = 15                       #how many songs to output
+saveupdate = False
 
 #get environment variables
 
@@ -38,11 +39,11 @@ SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
 #create connection URL
 
 conn_url = URL.create("mssql+pyodbc",
-                      username='***REMOVED***.edu',
-                      password='***REMOVED***',
-                      host='***REMOVED***',
-                      port='1433',
-                      database='***REMOVED***',
+                      username=DB_USER,
+                      password=DB_PASS,
+                      host=DB_SERVER,
+                      port=DB_PORT,
+                      database=DB_TABLE,
                       query={
                           'driver': 'ODBC DRIVER 18 for SQL Server',
                           'TrustServerCertifcate': 'yes',
@@ -68,8 +69,8 @@ data = data.loc[:, ~data.columns.duplicated()]
 #establish connection to spotipy API
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-    client_id='***REMOVED***', 
-    client_secret='***REMOVED***'))
+    client_id=SPOTIPY_CLIENT_ID, 
+    client_secret=SPOTIPY_CLIENT_SECRET))
 
 #create pipeline for KMeans
 
@@ -142,10 +143,16 @@ def new_song(song):
 #fits the pipeline with data
 def fit_pipeline(pipeline):
     print('Entering Fit Pipeline')
+    #maybe not the best solution, but
+    #fetch global variable which contains whether it updated
+    #prevents wednesday recreating the pipeline over and over
+    #but will ultimately cause it to not update twice unless
+    #the program has been restarted
+    global saveupdate
 
     #if pipeline data is 0 or if the weekday is wednesday - recreate data.sav
     #as we add data into our database we need to recreate data.sav to allow for the music to be recommended
-    if (os.path.getsize('data/data.sav') == 0 or datetime.today().weekday() == 2):
+    if ((os.path.getsize('data/data.sav') == 0 or datetime.today().weekday() == 4) and (not saveupdate)):
         #take the values of data w/o axes
         #fit pipeline with the data
         #assign labels to our data
@@ -154,6 +161,7 @@ def fit_pipeline(pipeline):
         song_cluster_labels = pipeline.predict(X)
         data['cluster_label'] = song_cluster_labels
 
+        saveupdate = True
         #pickle the data.sav
         pickle.dump(pipeline, open('data/data.sav', 'wb'))
         print('Pipeline Created!')
