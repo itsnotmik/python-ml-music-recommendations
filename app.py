@@ -55,11 +55,16 @@ conn_url = URL.create("mssql+pyodbc",
 engine = create_engine(conn_url)
 
 #create SQL query string
-
+"""
 sql = ( 'SELECT '
         'S.id, S.name, S.artists, SD.danceability, SD.energy, SD.loudness, SD.mode, SD.speechiness, '
         'SD.acousticness, SD.instrumentalness, SD.liveness, SD.valence, SD.tempo, SD.year '
         'FROM Songs as S INNER JOIN SongData as SD ON (S.id = SD.id)')
+"""
+sql = ( 'SELECT '
+        'id, name, artists, danceability, energy, loudness, mode, speechiness, '
+        'acousticness, instrumentalness, liveness, valence, tempo, year '
+        'FROM Songs')
 
 #read SQL from database into DataFrame && remove duplicate columns (to remove duplicate ID rows)
 
@@ -108,6 +113,7 @@ def new_song(song):
         artists_id_formatted = artists_id_formatted + a + ', '
     artists_id_formatted = artists_id_formatted[:-2] + ']'
 
+    """
     #create sql query to insert songs into song database
     insert_sql_song = ('INSERT INTO Songs '
                        '(id, name, album_id, artists, artists_id) '
@@ -123,7 +129,18 @@ def new_song(song):
                                                                                                       song['key'].values[0], song['loudness'].values[0],song['mode'].values[0], song['speechiness'].values[0], 
                                                                                                       song['acousticness'].values[0], song['instrumentalness'].values[0], song['liveness'].values[0], song['valence'].values[0],
                                                                                                       song['tempo'].values[0], song['duration_ms'].values[0], song['time_signature'].values[0], song['year'].values[0]))
-    
+    """
+    insert_sql_song = ('INSERT INTO Songs '
+                            '(id, name, album_id, artists, artists_id, explicit, danceability, energy, '
+                            '[key], loudness, mode, speechiness, acousticness, '
+                            'instrumentalness, liveness, valence, tempo, duration, time_signature, year) '
+                            'VALUES '
+                            '(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})'.format(id, name, album_id, artists_formatted, artists_id_formatted, 
+                                                                                                                                            song['explicit'].values[0], song['danceability'].values[0], song['energy'].values[0], 
+                                                                                                                                            song['key'].values[0], song['loudness'].values[0],song['mode'].values[0], song['speechiness'].values[0], 
+                                                                                                                                            song['acousticness'].values[0], song['instrumentalness'].values[0], song['liveness'].values[0], song['valence'].values[0],
+                                                                                                                                            song['tempo'].values[0], song['duration_ms'].values[0], song['time_signature'].values[0], song['year'].values[0]))
+
     #create sql query to check if song exists already
     select_sql_song = ('SELECT id FROM Songs WHERE id=\'' + id + '\'')
     
@@ -134,7 +151,7 @@ def new_song(song):
         if result.fetchone() is None:
             print("Entered Song Into Database")
             conn.execute(text(insert_sql_song))
-            conn.execute(text(insert_sql_song_data))
+            #conn.execute(text(insert_sql_song_data))
             conn.commit()
 
     print('Exiting New Song\n')
