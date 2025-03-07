@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 #varibles to tweak the program
 numclusters = 10                    #how many clusters in KMeans
 numsongs = 15                       #how many songs to output
-saveupdate = False
+saveupdate = datetime.today()
 
 #get environment variables
 
@@ -130,6 +130,7 @@ def new_song(song):
                                                                                                       song['acousticness'].values[0], song['instrumentalness'].values[0], song['liveness'].values[0], song['valence'].values[0],
                                                                                                       song['tempo'].values[0], song['duration_ms'].values[0], song['time_signature'].values[0], song['year'].values[0]))
     """
+
     insert_sql_song = ('INSERT INTO Songs '
                             '(id, name, album_id, artists, artists_id, explicit, danceability, energy, '
                             '[key], loudness, mode, speechiness, acousticness, '
@@ -140,6 +141,7 @@ def new_song(song):
                                                                                                                                             song['key'].values[0], song['loudness'].values[0],song['mode'].values[0], song['speechiness'].values[0], 
                                                                                                                                             song['acousticness'].values[0], song['instrumentalness'].values[0], song['liveness'].values[0], song['valence'].values[0],
                                                                                                                                             song['tempo'].values[0], song['duration_ms'].values[0], song['time_signature'].values[0], song['year'].values[0]))
+
 
     #create sql query to check if song exists already
     select_sql_song = ('SELECT id FROM Songs WHERE id=\'' + id + '\'')
@@ -167,9 +169,10 @@ def fit_pipeline(pipeline):
     #the program has been restarted
     global saveupdate
 
+
     #if pipeline data is 0 or if the weekday is wednesday - recreate data.sav
     #as we add data into our database we need to recreate data.sav to allow for the music to be recommended
-    if ((os.path.getsize('data/data.sav') == 0 or datetime.today().weekday() == 2) and (not saveupdate)):
+    if (os.path.getsize('data/data.sav') == 0 or saveupdate < datetime.today()-1):
         #take the values of data w/o axes
         #fit pipeline with the data
         #assign labels to our data
