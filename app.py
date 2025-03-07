@@ -46,9 +46,9 @@ conn_url = URL.create("mssql+pyodbc",
                       database=DB_TABLE,
                       query={
                           'driver': 'ODBC DRIVER 18 for SQL Server',
-                          'TrustServerCertifcate': 'yes',
-                          'authentication': 'ActiveDirectoryPassword'
+                          'TrustServerCertifcate': 'yes'
                       })
+print(conn_url)
 
 #create SQLAlchemy Engine
 
