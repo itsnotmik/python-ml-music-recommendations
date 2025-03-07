@@ -17,6 +17,7 @@ from collections import defaultdict                 #for dicts
 from spotipy.oauth2 import SpotifyClientCredentials #for spotify search
 from flask import Flask, jsonify, request, abort    #for flask application
 from datetime import datetime                       #for data rebuilding
+from datetime import timedelta
 
 warnings.filterwarnings("ignore")
 
@@ -48,7 +49,6 @@ conn_url = URL.create("mssql+pyodbc",
                           'driver': 'ODBC DRIVER 18 for SQL Server',
                           'TrustServerCertifcate': 'yes'
                       })
-print(conn_url)
 
 #create SQLAlchemy Engine
 
@@ -172,7 +172,7 @@ def fit_pipeline(pipeline):
 
     #if pipeline data is 0 or if the weekday is wednesday - recreate data.sav
     #as we add data into our database we need to recreate data.sav to allow for the music to be recommended
-    if (os.path.getsize('data/data.sav') == 0 or saveupdate < datetime.today()-1):
+    if (os.path.getsize('data/data.sav') == 0 or saveupdate < datetime.today()-timedelta(days=1)):
         #take the values of data w/o axes
         #fit pipeline with the data
         #assign labels to our data
