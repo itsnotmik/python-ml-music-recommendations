@@ -1,6 +1,10 @@
 # Python Machine Learning Music Recommendation System
 A Flask application that will allow for input of an ID or, Song name and Artist
 
+## DEPRECATED AS OF November 27, 2024
+
+### Due to Spotify's API changes, the functionality of the recommendation system is no longer functional as per implemented here 
+
 Used in part of [**Mik's Music**](https://github.com/itsnotmik/nodejs-miks-music)
 
 Will output a JSON format of the recommendations!
